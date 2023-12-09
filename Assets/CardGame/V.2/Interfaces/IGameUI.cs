@@ -21,19 +21,22 @@ public interface IGameUI
     /// <summary>
     /// Metodo utilizzato per effettuare il refresh degli slot sul terreno di gioco (UI).
     /// </summary>
-    /// <param name="board">La board a cui effettuare il refresh.</param>
-    void RefreshBoard(IBoard board);
+    void RefreshBoard();
 
     /// <summary>
     /// Metodo utilizzato per mostrare gli slot idonei al posizionamento della carta.
     /// </summary>
-    /// <param name="board">La board che contiene gli slot.</param>
-    /// <param name="card">La carta da verificare.</param>
-    void ShowEligibleslots(IBoard board, ICard card);
+    /// <param name="visualCard">La carta da verificare.</param>
+    void ShowEligibleslots(IVisualCard visualCard);
 
     /// <summary>
-    /// Metodo utilizzato per attivare/disattivare la possibilita' del giocatore di interagire con la UI.
+    /// Metodo utilizzato per attivare la logica UI di quando inizia un turno (es: attivare i controlli del giocatore).
     /// </summary>
-    /// <param name="player">Il giocatore di riferimento.</param>
-    void TogglePlayerControls(IPlayer player);
+    /// <param name="player">Il giocatore del turno corrente.</param>
+    void StartTurn(IPlayer player);
+
+    /// <summary>
+    /// Metodo utilizzato per attivare la logica UI di quando finisce un turno (es: disattivare i controlli del giocatore).
+    /// </summary>
+    void EndTurn();
 }

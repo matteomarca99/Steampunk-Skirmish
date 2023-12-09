@@ -25,3 +25,9 @@ MonoBehaviour:
   cardEffect:
   - cardEffectType: 0
     value: 2
+  attackAnimationData:
+    rotationDuration: 2
+    backwardMoveDuration: 3
+    forwardMoveDuration: 4
+    returnMoveDuration: 5
+    returnRotationDuration: 5

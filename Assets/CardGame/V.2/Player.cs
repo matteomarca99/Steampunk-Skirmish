@@ -7,6 +7,8 @@ public class Player : IPlayer
     private PlayerHand hand;
     private Deck deck;
 
+    private bool canPlay;
+
     public Player(string playerName, PlayerType playerType, Deck playerDeck)
     {
         this.playerName = playerName;
@@ -18,24 +20,24 @@ public class Player : IPlayer
         playerDeck.SetCardsOwner(this);
     }
 
-    public void AddCardToHand(ICard card)
+    public void AddCardToHand(IVisualCard visualCard)
     {
-        hand.AddCardToHand(card);
+        hand.AddCardToHand(visualCard);
     }
 
-    public void RemoveCardFromHand(ICard card)
+    public void RemoveCardFromHand(IVisualCard visualCard)
     {
-        hand.RemoveCardFromHand(card);
+        hand.RemoveCardFromHand(visualCard);
     }
 
-    public List<ICard> GetCardsInHand()
+    public List<IVisualCard> GetCardsInHand()
     {
         return hand.GetCardsInHand();
     }
 
     public void DrawCardFromDeck()
     {
-        if(deck.CanDrawCard() && hand.CanAddCartToHand())
+        if(CanDrawCardFromDeck())
             hand.AddCardToHand(deck.DrawCard());
     }
 
@@ -47,6 +49,10 @@ public class Player : IPlayer
         }
     }
 
+    public bool CanDrawCardFromDeck()
+    {
+        return deck.CanDrawCard() && hand.CanAddCartToHand();
+    }
 
     public List<ICard> GetCardsInDeck()
     {
@@ -62,4 +68,6 @@ public class Player : IPlayer
     {
         return playerType;
     }
+
+    public bool CanPlay { get => canPlay; set => canPlay = value; }
 }

@@ -29,7 +29,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         rectTransform.anchoredPosition += eventData.delta / GetComponentInParent<Canvas>().scaleFactor;
 
         // Notifichiamo che stiamo effettuando il drag di una carta
-        EventManager.TriggerEvent(EventType.OnCardDrag, visualCard.GetCard());
+        EventManager.TriggerEvent(EventType.OnCardDrag, visualCard);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -42,6 +42,6 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         IBoardSlot slot = dropZone?.GetComponent<IBoardSlot>();
 
         // Se il drag finisce, proviamo a giocare la carta
-        EventManager.TriggerEvent(EventType.OnTryPlayCard, visualCard.GetCard(), slot);
+        EventManager.TriggerEvent(EventType.OnTryPlayCard, visualCard, slot);
     }
 }

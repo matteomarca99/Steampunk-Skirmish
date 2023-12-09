@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 public class PlayerHand : IPlayerHand
 {
-    private List<ICard> cardsInHand;
+    private List<IVisualCard> cardsInHand;
     private readonly int maxCardsInHand = 8;
 
     public PlayerHand()
     {
-        cardsInHand = new List<ICard>();
+        cardsInHand = new List<IVisualCard>();
     }
 
     public bool CanAddCartToHand()
@@ -15,22 +15,22 @@ public class PlayerHand : IPlayerHand
         return cardsInHand.Count < maxCardsInHand;
     }
 
-    public void AddCardToHand(ICard card)
+    public void AddCardToHand(IVisualCard visualCard)
     {
         if (CanAddCartToHand())
         {
-            cardsInHand.Add(card);
-            card.IsInHand = true;
+            cardsInHand.Add(visualCard);
+            visualCard.GetCard().IsInHand = true;
         }
     }
 
-    public void RemoveCardFromHand(ICard card)
+    public void RemoveCardFromHand(IVisualCard visualCard)
     {
-        cardsInHand.Remove(card);
-        card.IsInHand = false;
+        cardsInHand.Remove(visualCard);
+        visualCard.GetCard().IsInHand = false;
     }
 
-    public List<ICard> GetCardsInHand()
+    public List<IVisualCard> GetCardsInHand()
     {
         return cardsInHand;
     }

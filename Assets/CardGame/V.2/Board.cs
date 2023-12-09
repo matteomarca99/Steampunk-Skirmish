@@ -6,20 +6,20 @@ public class Board : MonoBehaviour, IBoard
 {
     public List<BoardSlot> boardSlots;
 
-    public bool CanPlaceCard(ICard card, IBoardSlot slot)
+    public bool CanPlaceCard(IVisualCard visualCard, IBoardSlot slot)
     {
         // Logica per verificare se la carta può essere posizionata in una specifica posizione sulla board
-        return slot != null && slot.CanDropCard(card);
+        return slot != null && slot.CanDropCard(visualCard);
     }
 
-    public void PlaceCard(ICard card, IBoardSlot slot)
+    public void PlaceCard(IVisualCard visualCard, IBoardSlot slot)
     {
         // Logica per posizionare effettivamente la carta sulla board e quindi nello slot corrispondente
-        if(CanPlaceCard(card, slot))
-            slot.DropCard(card);
+        if(CanPlaceCard(visualCard, slot))
+            slot.DropCard(visualCard);
     }
 
-    public ICard SelectCard(IBoardSlot slot)
+    public IVisualCard SelectCard(IBoardSlot slot)
     {
         return slot.GetCardInSlot();
     }
@@ -29,8 +29,15 @@ public class Board : MonoBehaviour, IBoard
         return boardSlots.Cast<IBoardSlot>().ToList();
     }
 
-    public List<IBoardSlot> GetEligibleSlots(ICard card)
+    public List<IVisualCard> GetVisualCards()
     {
-        return boardSlots.Where(slot => CanPlaceCard(card, slot)).ToList<IBoardSlot>();
+        return boardSlots.Select(slot => slot.GetCardInSlot())
+                .Where(visualCard => visualCard != null)
+                .ToList();
+    }
+
+    public List<IBoardSlot> GetEligibleSlots(IVisualCard visualCard)
+    {
+        return boardSlots.Where(slot => CanPlaceCard(visualCard, slot)).ToList<IBoardSlot>();
     }
 }

@@ -9,6 +9,8 @@ public class AIPlayer : IPlayer, IAIPlayer
     private PlayerHand hand;
     private Deck deck;
 
+    private bool canPlay;
+
     public AIPlayer(string playerName, PlayerType playerType, Deck playerDeck)
     {
         this.playerName = playerName;
@@ -22,51 +24,51 @@ public class AIPlayer : IPlayer, IAIPlayer
 
     public void PlayTurn(IBoard board)
     {
-        List<ICard> cardsInHand = hand.GetCardsInHand();
-
-        foreach (ICard card in cardsInHand)
+        if (canPlay)
         {
-            List<IBoardSlot> availableSlots = board.GetEligibleSlots(card);
+            List<IVisualCard> cardsInHand = hand.GetCardsInHand();
 
-            if (availableSlots.Count > 0)
+            foreach (IVisualCard card in cardsInHand)
             {
-                // Scegli un slot casuale tra quelli disponibili
-                int randomSlotIndex = Random.Range(0, availableSlots.Count);
-                IBoardSlot slotToPlaceCard = availableSlots[randomSlotIndex];
+                List<IBoardSlot> availableSlots = board.GetEligibleSlots(card);
 
-                // Notifichiamo che vogliamo giocare la carta in quello slot
-                EventManager.TriggerEvent(EventType.OnTryPlayCard, card, slotToPlaceCard);
+                if (availableSlots.Count > 0)
+                {
+                    // Scegli un slot casuale tra quelli disponibili
+                    int randomSlotIndex = Random.Range(0, availableSlots.Count);
+                    IBoardSlot slotToPlaceCard = availableSlots[randomSlotIndex];
 
-                // Notifichiamo anche che abbiamo finito il turno
-                EventManager.TriggerEvent(EventType.OnEndTurn);
+                    // Notifichiamo che vogliamo giocare la carta in quello slot
+                    EventManager.TriggerEvent(EventType.OnTryPlayCard, card, slotToPlaceCard);
 
-                // Se hai eseguito un'azione, esci dal metodo PlayTurn
-                return;
+                    // Se hai eseguito un'azione, esci dal metodo PlayTurn
+                    break;
+                }
             }
+
+            // Notifichiamo anche che abbiamo finito il turno
+            EventManager.TriggerEvent(EventType.OnEndTurn);
         }
-
-        // Notifichiamo anche che abbiamo finito il turno
-        EventManager.TriggerEvent(EventType.OnEndTurn);
     }
 
-    public void AddCardToHand(ICard card)
+    public void AddCardToHand(IVisualCard visualCard)
     {
-        hand.AddCardToHand(card);
+        hand.AddCardToHand(visualCard);
     }
 
-    public void RemoveCardFromHand(ICard card)
+    public void RemoveCardFromHand(IVisualCard visualCard)
     {
-        hand.RemoveCardFromHand(card);
+        hand.RemoveCardFromHand(visualCard);
     }
 
-    public List<ICard> GetCardsInHand()
+    public List<IVisualCard> GetCardsInHand()
     {
         return hand.GetCardsInHand();
     }
 
     public void DrawCardFromDeck()
     {
-        if (deck.CanDrawCard() && hand.CanAddCartToHand())
+        if (CanDrawCardFromDeck())
             hand.AddCardToHand(deck.DrawCard());
     }
 
@@ -76,6 +78,11 @@ public class AIPlayer : IPlayer, IAIPlayer
         {
             DrawCardFromDeck();
         }
+    }
+
+    public bool CanDrawCardFromDeck()
+    {
+        return deck.CanDrawCard() && hand.CanAddCartToHand();
     }
 
 
@@ -93,4 +100,6 @@ public class AIPlayer : IPlayer, IAIPlayer
     {
         return playerType;
     }
+
+    public bool CanPlay { get => canPlay; set => canPlay = value; }
 }

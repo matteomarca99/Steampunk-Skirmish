@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class ActionQueueManager : MonoBehaviour
 {
-    private Queue<System.Action> actionQueue = new Queue<System.Action>();
-
+    private Queue<QueuedAction> actionQueue = new Queue<QueuedAction>();
     private bool isProcessing;
 
-    public void EnqueueAction(System.Action action)
+    public void EnqueueAction(System.Action action, float initialDelay, float finalDelay)
     {
-        actionQueue.Enqueue(action);
+        QueuedAction queuedAction = new QueuedAction(action, initialDelay, finalDelay);
+        actionQueue.Enqueue(queuedAction);
         if (!isProcessing)
         {
             StartCoroutine(ProcessActionQueue());
@@ -23,11 +23,13 @@ public class ActionQueueManager : MonoBehaviour
 
         while (actionQueue.Count > 0)
         {
-            System.Action nextAction = actionQueue.Dequeue();
-            yield return new WaitForSeconds(1f); // Tempo di attesa tra un'azione e l'altra
+            QueuedAction nextAction = actionQueue.Dequeue();
 
-            // Esegui l'azione
-            nextAction?.Invoke();
+            yield return new WaitForSeconds(nextAction.initialDelay);
+
+            nextAction.action?.Invoke();
+
+            yield return new WaitForSeconds(nextAction.finalDelay);
         }
 
         isProcessing = false;

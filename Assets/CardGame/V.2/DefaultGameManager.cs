@@ -7,12 +7,15 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 {
     private ActionQueueManager actionQueueManager;
 
+    public GameObject cardPrefab;
+
     public List<CardData> playerCardsData;
     public List<CardData> opponentCardsData;
 
     public GameUI gameUI;
     public Board board;
     public int initialCardsNumber;
+    public float aiDelay;
 
     private TurnManager turnManager;
     private DamageManager damageManager;
@@ -29,13 +32,13 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
     {
         actionQueueManager = GetComponent<ActionQueueManager>();
         EventManager.SubscribeToEvent<IPlayer>(EventType.OnDrawCard, OnDrawcard);
-        EventManager.SubscribeToEvent<ICard>(EventType.OnCardDrag, OnCardDrag);
-        EventManager.SubscribeToEvent<ICard, IBoardSlot>(EventType.OnTryPlayCard, OnTryPlayCard);
-        EventManager.SubscribeToEvent<IPlayer>(EventType.OnPlayerCanPlay, OnPlayerCanPlay);
+        EventManager.SubscribeToEvent<IVisualCard>(EventType.OnCardDrag, OnCardDrag);
+        EventManager.SubscribeToEvent<IVisualCard, IBoardSlot>(EventType.OnTryPlayCard, OnTryPlayCard);
+        EventManager.SubscribeToEvent(EventType.OnStartTurn, OnStartTurn);
         EventManager.SubscribeToEvent(EventType.OnEndTurn, OnEndTurn);
         EventManager.SubscribeToEvent<IVisualCard, IVisualCard>(EventType.OnTryCardAttack, OnTryCardAttack);
-        EventManager.SubscribeToEvent<Transform>(EventType.OnBeginTargeting, OnBeginTargeting);
-        EventManager.SubscribeToEvent(EventType.OnEndTargeting, OnEndTargeting);
+        EventManager.SubscribeToEvent<IVisualCard>(EventType.OnBeginTargeting, OnBeginTargeting);
+        EventManager.SubscribeToEvent<IVisualCard>(EventType.OnEndTargeting, OnEndTargeting);
         EventManager.SubscribeToEvent<IVisualCard>(EventType.OnCardDestroyed, OnCardDestroyed);
     }
 
@@ -49,10 +52,10 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
         // IMPLEMENTAZIONE PER INIZIARE LA PARTITA
 
         // Inizializzazione del deck del giocatore (il deck si occupera' di creare le carte che corrispondono alle CardData)
-        playerDeck = new Deck(playerCardsData);
+        playerDeck = new Deck(playerCardsData, cardPrefab);
 
         // Inizializzazione del deck dell'IA (il deck si occupera' di creare le carte che corrispondono alle CardData)
-        opponentDeck = new Deck(opponentCardsData);
+        opponentDeck = new Deck(opponentCardsData, cardPrefab);
 
         // Inizializzazione del giocatore (che inizializza in automatico anche la PlayerHand associata)
         player = new Player("Matteo", PlayerType.Player, playerDeck);
@@ -95,37 +98,59 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
     {
         actionQueueManager.EnqueueAction(() =>
         {
-            player.DrawCardFromDeck();
-            gameUI.RefreshHand(player);
-        });
+            if (player.CanDrawCardFromDeck())
+            {
+                Debug.Log("Pesco...");
+                player.DrawCardFromDeck();
+                gameUI.DoDrawAnim(player);
+            }
+        }, 0f, 1f);
     }
 
-    void OnCardDrag(ICard card)
+    void OnCardDrag(IVisualCard visualCard)
     {
-        gameUI.ShowEligibleslots(board, card);
+        gameUI.ShowEligibleslots(visualCard);
     }
 
-    void OnPlayerCanPlay(IPlayer curTurnPlayer)
+    void OnStartTurn()
     {
+        IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
+
+        // Inizio del turno, peschiamo una carta
+        OnDrawcard(curTurnPlayer);
+
+        curTurnPlayer.CanPlay = true;
+
+        gameUI.StartTurn(curTurnPlayer);
+
         if (curTurnPlayer is IAIPlayer aiPlayer)
         {
             aiPlayer.PlayTurn(board);
-
-            if(turnManager.GetCurrentTurn() > 1)
-                gameUI.TogglePlayerControls(player);
-        } else
-        {
-            gameUI.TogglePlayerControls(player);
         }
     }
 
-
-    void OnTryPlayCard(ICard card, IBoardSlot slot)
+    public void OnEndTurn()
     {
+        IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
+
+        float delay = GetPlayerDelay(curTurnPlayer);
+
         actionQueueManager.EnqueueAction(() =>
         {
-            IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
+            curTurnPlayer.CanPlay = false;
+            turnManager.EndTurn();
+            gameUI.EndTurn();
+        }, delay, 0f);
+    }
 
+    void OnTryPlayCard(IVisualCard card, IBoardSlot slot)
+    {
+        IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
+
+        float delay = GetPlayerDelay(curTurnPlayer);
+
+        actionQueueManager.EnqueueAction(() =>
+        {
             // Per prima cosa verifichiamo se la carta puo' essere posisizonata sullo slot corrispondente
             if (board.CanPlaceCard(card, slot))
             {
@@ -136,26 +161,31 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
                 board.PlaceCard(card, slot);
 
                 // Inoltre ovviamente impostiamo la carta in posizione scoperta
-                card.CardDirectionType = CardDirectionType.FaceUp;
+                card.GetCard().CardDirectionType = CardDirectionType.FaceUp;
             }
             // Infine aggiorniamo la UI
             gameUI.RefreshHand(curTurnPlayer);
-            gameUI.RefreshBoard(board);
-        });
+            gameUI.RefreshBoard();
+        }, delay, 0f);
     }
 
     void OnTryCardAttack(IVisualCard attacker, IVisualCard target)
     {
-        if (attacker.GetCard().CurHealth > 0 && target.GetCard().CurHealth > 0)
+        // Aggiungi l'animazione dell'attacco in coda
+        if(damageManager.CanAttack(attacker, target))
         {
-            damageManager.Attack(attacker, target);
+            float animLength = attacker.GetCard().CardData.attackAnimationData.GetAnimLength();
             actionQueueManager.EnqueueAction(() =>
             {
-                // Animazione Attacco //
-
-                if (attacker.GetCard().CurHealth > 0)
-                    gameUI.RefreshBoard(board);
-            });
+                if (damageManager.CanAttack(attacker, target))
+                {
+                    damageManager.Attack(attacker, target);
+                    gameUI.DoAttackAnim(attacker, target);
+                } else
+                {
+                    animLength = 0;
+                }
+            }, 0f, animLength);
         }
     }
 
@@ -163,36 +193,31 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
     {
         Debug.Log(visualCard.GetCard().CardData.name + " è stata distrutta!");
 
-        actionQueueManager.EnqueueAction(() =>
-        {
-            visualCard.DestroyVisualCard();
-
-            gameUI.RefreshBoard(board);
-            gameUI.RefreshHand(players);
-        });
+        Destroy(visualCard.GetTransform().gameObject);
     }
 
-    void OnBeginTargeting(Transform attacker)
+    void OnBeginTargeting(IVisualCard attacker)
     {
-        gameUI.BeginTargeting(attacker);
+        List<IVisualCard> eligibleTargets = damageManager.GetEligibleTargets(attacker, board.GetVisualCards());
+
+        gameUI.BeginTargeting(attacker, attacker.GetTransform(), eligibleTargets);
     }
 
-    void OnEndTargeting()
+    void OnEndTargeting(IVisualCard attacker)
     {
-        gameUI.EndTargeting();
+        List<IVisualCard> eligibleTargets = damageManager.GetEligibleTargets(attacker, board.GetVisualCards());
+
+        gameUI.EndTargeting(eligibleTargets);
     }
 
-    public void OnEndTurn()
+    public void OnEndTurnBtn()
     {
-        actionQueueManager.EnqueueAction(() =>
-        {
-            turnManager.EndTurn();
-        });
+        OnEndTurn();
     }
 
-    public void RefreshPlayerHandTEST()
+    float GetPlayerDelay(IPlayer player)
     {
-        gameUI.RefreshHand(opponent);
+        return player is IAIPlayer ? aiDelay : 0f;
     }
 
     void PrintDebug()

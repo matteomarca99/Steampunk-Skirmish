@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81d237ba871218a47830ef7122c37ef5, type: 3}
   m_Name: Sentinel
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 9ed4935eeedf93b46a0f57031ee3901f, type: 3}
+  sprite: {fileID: 21300000, guid: d22b78c6fb7894743b37928b6fa2daf2, type: 3}
   backSprite: {fileID: 21300000, guid: ce1c3c869ff70114faa1b43588f269c2, type: 3}
   cardName: Sentinella Robot
   cardDescription: "Sentinella letale.\n\nPu\xF2 attaccare solo la prima fila."
@@ -25,3 +25,9 @@ MonoBehaviour:
   cardEffect:
   - cardEffectType: 0
     value: 2
+  attackAnimationData:
+    rotationDuration: 0.2
+    backwardMoveDuration: 0.8
+    forwardMoveDuration: 0.3
+    returnMoveDuration: 0.3
+    returnRotationDuration: 0.2

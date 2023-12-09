@@ -5,9 +5,12 @@ using UnityEngine;
 public class Deck : IDeck
 {
     private List<ICard> cards;
+    private GameObject cardPrefab;
 
-    public Deck(List<CardData> initialCardsData)
+    public Deck(List<CardData> initialCardsData, GameObject cardPrefab)
     {
+        this.cardPrefab = cardPrefab;
+
         cards = new List<ICard>();
 
         foreach (CardData data in initialCardsData)
@@ -31,7 +34,7 @@ public class Deck : IDeck
         return cards.Count > 0;
     }
 
-    public ICard DrawCard()
+    public IVisualCard DrawCard()
     {
         if (CanDrawCard())
         {
@@ -40,9 +43,11 @@ public class Deck : IDeck
             if (drawnCard != null)
             {
                 cards.Remove(drawnCard);
+                GameObject visualCardObject = Object.Instantiate(cardPrefab);
+                IVisualCard visualCard = visualCardObject.GetComponent<IVisualCard>();
+                visualCard.SetCardData(drawnCard);
+                return visualCard;
             }
-
-            return drawnCard;
         }
         return null;
     }

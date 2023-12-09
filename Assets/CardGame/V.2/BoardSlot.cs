@@ -3,25 +3,25 @@ using System;
 
 public class BoardSlot : MonoBehaviour, IBoardSlot
 {
-    private ICard cardInSlot; // Riferimento alla carta presente nello slot
+    private IVisualCard cardInSlot; // Riferimento alla carta visuale presente nello slot
 
     public PlayerType slotOwner;
 
     public PlacementType placementType;
 
-    public bool CanDropCard(ICard card)
+    public bool CanDropCard(IVisualCard visualCard)
     {
         // Logica per verificare se la carta può essere posizionata in questa cella
         return cardInSlot == null 
-            && card.CardData.cardPlacement == placementType 
-            && card.CardOwner.GetPlayerType() == slotOwner;
+            && visualCard.GetCard().CardData.cardPlacement == placementType 
+            && visualCard.GetCard().CardOwner.GetPlayerType() == slotOwner;
     }
 
-    public void DropCard(ICard card)
+    public void DropCard(IVisualCard visualCard)
     {
-        if (CanDropCard(card))
+        if (CanDropCard(visualCard))
         {
-            cardInSlot = card; // Assegna la carta allo slot
+            cardInSlot = visualCard; // Assegna la carta allo slot
         }
         else
         {
@@ -35,7 +35,7 @@ public class BoardSlot : MonoBehaviour, IBoardSlot
         cardInSlot = null;
     }
 
-    public ICard GetCardInSlot()
+    public IVisualCard GetCardInSlot()
     {
         return cardInSlot != null ? cardInSlot : null;
     }

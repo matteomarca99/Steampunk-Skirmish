@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// Interfaccia che definisce un deck di carte.
+/// Interfaccia che definisce un deck di carte visuali (VisualCard).
 /// </summary>
 public interface IDeck
 {
@@ -17,10 +17,11 @@ public interface IDeck
     bool CanDrawCard();
 
     /// <summary>
-    /// Metodo utilizzato per pescare una carta dal deck. Se la carta e' valida allora viene rimossa dal deck.
+    /// Metodo utilizzato per pescare una carta dal deck. La carta sara' restituita in formato visuale.
+    /// Se la carta e' valida allora viene rimossa dal deck.
     /// </summary>
-    /// <returns>La carta pescata, Null altrimenti.</returns>
-    ICard DrawCard();
+    /// <returns>La carta pescata in formato visuale, Null altrimenti.</returns>
+    IVisualCard DrawCard();
 
     /// <summary>
     /// Metodo che restituisce la lista delle carte presenti nel deck.

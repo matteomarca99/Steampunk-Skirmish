@@ -6,15 +6,15 @@ public interface IBoardSlot
     /// <summary>
     /// Metodo utilizzato per verificare se una carta puo' essere giocata nello slot.
     /// </summary>
-    /// <param name="card">La carta da giocare.</param>
+    /// <param name="visualCard">La carta da giocare.</param>
     /// <returns>True se la carta puo' essere posizionata nello slot, False altrimenti.</returns>
-    bool CanDropCard(ICard card);
+    bool CanDropCard(IVisualCard visualCard);
 
     /// <summary>
     /// Metodo utilizzato per posizionare una carta nello slot.
     /// </summary>
-    /// <param name="card">La carta da posizionare nello slot.</param>
-    void DropCard(ICard card);
+    /// <param name="visualCard">La carta da posizionare nello slot.</param>
+    void DropCard(IVisualCard visualCard);
 
     /// <summary>
     /// Metodo utilizzato per rimuovere la carta dallo slot (se presente).
@@ -25,7 +25,7 @@ public interface IBoardSlot
     /// Metodo che ritorna la carta presente nello slot.
     /// </summary>
     /// <returns>La carta presente nello slot, Null se lo slot e' libero.</returns>
-    ICard GetCardInSlot();
+    IVisualCard GetCardInSlot();
 
     /// <summary>
     /// Metodo che ritorna il tipo di proprietario dello slot.

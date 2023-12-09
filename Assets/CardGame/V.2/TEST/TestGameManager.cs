@@ -64,24 +64,4 @@ public class TestGameManager : MonoBehaviour
             Debug.Log("SLOT => Nome slot: " + slot.gameObject.name);
         }
     }
-
-    private void PrintCardsInHand(IPlayer player)
-    {
-        // Ottenere le carte in mano del giocatore
-        List<ICard> cardsInHand = player.GetCardsInHand();
-        foreach (ICard card in cardsInHand)
-        {
-            Debug.Log("MANO => Nome carta: " + card.CardData.name + "   Costo: " + card.CardData.steamCost);
-        }
-    }
-
-    private void PrintCardsInDeck(IDeck deck)
-    {
-        // Ottenere le carte nel deck del giocatore
-        List<ICard> cardsInDeck = deck.GetCards();
-        foreach (ICard card in cardsInDeck)
-        {
-            Debug.Log("DECK => Nome carta: " + card.CardData.name + "   Costo: " + card.CardData.steamCost);
-        }
-    }
 }

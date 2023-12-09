@@ -19,16 +19,14 @@ public class TurnManager : ITurnManager
     {
         Debug.Log("Inizio turno " + currentTurn + " del giocatore " + currentTurnPlayer.GetPlayerName());
 
-        // Il turno inizia, il giocatore di turno deve pescare una carta
-        EventManager.TriggerEvent(EventType.OnDrawCard, currentTurnPlayer);
-
-        // E ovviamente il giocatore puo' giocare
-        EventManager.TriggerEvent(EventType.OnPlayerCanPlay, currentTurnPlayer);
+        // Notifichiamo l'inizio del turno
+        EventManager.TriggerEvent(EventType.OnStartTurn);
     }
 
     public void EndTurn()
     {
         Debug.Log("Fine turno " + " del giocatore " + currentTurnPlayer.GetPlayerName());
+
         currentTurn++;
 
         // Passa il turno al prossimo giocatore

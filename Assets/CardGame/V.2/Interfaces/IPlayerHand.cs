@@ -15,17 +15,17 @@ public interface IPlayerHand
     /// Metodo utilizzato per aggiungere una carta alla mano di carte del giocatore.
     /// </summary>
     /// <param name="card">La carta da aggiungere.</param>
-    void AddCardToHand(ICard card);
+    void AddCardToHand(IVisualCard visualCard);
 
     /// <summary>
     /// Metodo utilizzato per rimuovere una carta dalla mano di carte del giocatore.
     /// </summary>
     /// <param name="card">La carta da rimuovere.</param>
-    void RemoveCardFromHand(ICard card);
+    void RemoveCardFromHand(IVisualCard visualCard);
 
     /// <summary>
     /// Metodo che restituisce la lista di tutte le carte nella mano del giocatore.
     /// </summary>
     /// <returns>La lista delle carte nella mano del giocatore.</returns>
-    List<ICard> GetCardsInHand();
+    List<IVisualCard> GetCardsInHand();
 }
