@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 8246504405538980041}
   m_Layer: 5
   m_Name: CardPrefab
-  m_TagString: Untagged
+  m_TagString: VisualCard
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -319,7 +319,7 @@ MonoBehaviour:
   steamCost: {fileID: 3240713367968697317}
   health: {fileID: 905012398604379062}
   damage: {fileID: 4909511854139010687}
-  armor: {fileID: 65772649520822432}
+  actionPoints: {fileID: 65772649520822432}
 --- !u!114 &3083097796347777023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,7 +369,7 @@ GameObject:
   - component: {fileID: 3568545034095366140}
   - component: {fileID: 65772649520822432}
   m_Layer: 5
-  m_Name: ArmorText
+  m_Name: ActionPointsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1138,7 +1138,7 @@ GameObject:
   - component: {fileID: 2971028228229999718}
   - component: {fileID: 3423989137491916009}
   m_Layer: 5
-  m_Name: Armor
+  m_Name: ActionPoints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1161,8 +1161,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 10, y: 8}
-  m_SizeDelta: {x: 210, y: 260}
+  m_AnchoredPosition: {x: 21.6, y: 13.88}
+  m_SizeDelta: {x: 260, y: 310}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &8123892469095186165
 CanvasRenderer:
@@ -1217,8 +1217,8 @@ MonoBehaviour:
   settings:
     _blur: 0
     _endAngle: 360
-    _fillColor: {r: 0.14150941, g: 0.14150941, b: 0.14150941, a: 1}
-    _fillColor2: {r: 0.94509804, g: 0.76862746, b: 0.05882353, a: 0.5019608}
+    _fillColor: {r: 0, g: 0.3018868, b: 0.024424931, a: 1}
+    _fillColor2: {r: 0.04517323, g: 0.39607844, b: 0, a: 1}
     _fillOffset: {x: 0, y: 0}
     _fillPathLoops: 0
     _fillRotation: 0
@@ -1240,21 +1240,19 @@ MonoBehaviour:
       p1: {x: 0, y: 0, z: 0}
       p2: {x: 0.3, y: 0, z: 0}
     _pathThickness: 0.1
-    _polygonPreset: 4
+    _polygonPreset: 2
     _polyVertices:
-    - {x: -0.000000021855694, y: 0.5}
-    - {x: -0.4330127, y: 0.25000003}
-    - {x: -0.43301263, y: -0.2500001}
-    - {x: 0.0000000059624403, y: -0.5}
-    - {x: 0.43301278, y: -0.24999988}
-    - {x: 0.4330127, y: 0.25000003}
+    - {x: 0, y: 0.5}
+    - {x: -0.5, y: 0}
+    - {x: 0, y: -0.5}
+    - {x: 0.5, y: 0}
     _roundness: 30
     _roundnessBottomLeft: 30
     _roundnessBottomRight: 30
     _roundnessPerCorner: 0
     _roundnessTopLeft: 30
     _roundnessTopRight: 30
-    _shapeType: 2
+    _shapeType: 1
     _startAngle: 0
     _triangleOffset: 0.5
     _usePolygonMap: 0

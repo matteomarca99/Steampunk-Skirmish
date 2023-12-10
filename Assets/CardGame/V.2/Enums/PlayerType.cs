@@ -4,7 +4,6 @@
 public enum PlayerType
 {
     Player,
-    IA,
     Opponent
     // Altri tipi di giocatore
 }

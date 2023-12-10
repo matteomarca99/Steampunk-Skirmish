@@ -13,9 +13,10 @@ public class CardTargeting : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        /*
         // Ovviamente se la carta non è di proprietà del player, non possiamo fare il targeting
         if (attackingVisualCard.GetCard().CardOwner.GetPlayerType() != PlayerType.Player)
-            return;
+            return;*/
 
         Debug.Log("ATTACCANTE: " + attackingVisualCard.GetCard().CardData.name);
 
@@ -39,16 +40,36 @@ public class CardTargeting : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         foreach (RaycastResult result in results)
         {
-            IVisualCard targetVisualCard = result.gameObject.GetComponent<IVisualCard>();
-
-            if (targetVisualCard != null && targetVisualCard != attackingVisualCard && targetVisualCard.GetCard().CurHealth > 0 && targetVisualCard.GetCard() is IDamageable)
+            // Controlla se il GameObject ha il tag "VisualCard"
+            if (result.gameObject.CompareTag("VisualCard"))
             {
-                Debug.Log("ATTACCANTE: " + attackingVisualCard.GetCard().CardData.name + ", TARGET: " + targetVisualCard.GetCard().CardData.name);
+                IVisualCard targetVisualCard = result.gameObject.GetComponent<IVisualCard>();
 
-                // Notifichiamo il possibile attacco, poi chi ricevera' la notifica si occupera' di effettuarlo
-                EventManager.TriggerEvent<IVisualCard, IVisualCard>(EventType.OnTryCardAttack, attackingVisualCard, targetVisualCard);
+                if (targetVisualCard != null && targetVisualCard != attackingVisualCard && targetVisualCard.GetCard().CurHealth > 0 && targetVisualCard.GetCard() is IDamageable)
+                {
+                    Debug.Log("ATTACCANTE: " + attackingVisualCard.GetCard().CardData.name + ", TARGET: " + targetVisualCard.GetCard().CardData.name);
 
-                break;
+                    // Notifichiamo il possibile attacco, poi chi ricevera' la notifica si occupera' di effettuarlo
+                    EventManager.TriggerEvent<IVisualCard, IVisualCard>(EventType.OnTryCardAttack, attackingVisualCard, targetVisualCard);
+
+                    break;
+                }
+            }
+
+            // Controlla se il GameObject ha il tag "BoardSlot"
+            if (result.gameObject.CompareTag("BoardSlot"))
+            {
+                IBoardSlot slot = result.gameObject.GetComponent<IBoardSlot>();
+
+                if (slot != null && slot.GetCardInSlot() == null)
+                {
+                    Debug.Log("SPOSTAMENTO: " + attackingVisualCard.GetCard().CardData.name + ", NELLO SLOT: " + slot.ToString());
+
+                    // Notifichiamo il possibile spostamento della carta, poi chi ricevera' la notifica si occupera' di effettuarlo
+                    EventManager.TriggerEvent<IVisualCard, IBoardSlot>(EventType.OnTryMoveCard, attackingVisualCard, slot);
+
+                    break;
+                }
             }
         }
 

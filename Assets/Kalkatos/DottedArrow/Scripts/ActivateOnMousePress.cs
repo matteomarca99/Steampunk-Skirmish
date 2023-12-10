@@ -10,7 +10,7 @@ namespace Kalkatos.DottedArrow
 		private void Update ()
 		{
 			if (Input.GetMouseButtonDown(0))
-				arrow.SetupAndActivate(origin);
+				arrow.SetupAndActivate(origin, null);
 			else if (Input.GetMouseButtonUp(0))
 				arrow.Deactivate();
 		}

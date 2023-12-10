@@ -20,6 +20,7 @@ MonoBehaviour:
   health: 4
   armor: 1
   baseDamage: 2
+  actionPointsPerTurn: 1
   cardPlacement: 0
   cardAttackType: 0
   cardEffect:

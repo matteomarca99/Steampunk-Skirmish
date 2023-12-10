@@ -9,7 +9,7 @@ public class VisualCard : MonoBehaviour, IVisualCard
     public TextMeshProUGUI steamCost;
     public TextMeshProUGUI health;
     public TextMeshProUGUI damage;
-    public TextMeshProUGUI armor;
+    public TextMeshProUGUI actionPoints;
 
     private ICard card;
 
@@ -18,6 +18,7 @@ public class VisualCard : MonoBehaviour, IVisualCard
     private CardHoverAnimation cardHoverAnimation;
 
     private bool markedForDestruction = false;
+    private bool isAnimating = false;
 
     void Awake()
     {
@@ -54,15 +55,15 @@ public class VisualCard : MonoBehaviour, IVisualCard
 
             health.text = card.CurHealth.ToString();
             damage.text = card.CardData.baseDamage.ToString();
-            armor.text = card.CardData.armor.ToString();
+            actionPoints.text = card.ActionPoints.ToString();
 
-            if (card.CardData.armor < 1)
+            if (card.ActionPoints <= 0)
             {
-                armor.transform.parent.gameObject.SetActive(false);
+                actionPoints.transform.parent.gameObject.SetActive(false);
             }
             else
             {
-                armor.transform.parent.gameObject.SetActive(true);
+                actionPoints.transform.parent.gameObject.SetActive(true);
             }
         }
     }
@@ -101,6 +102,16 @@ public class VisualCard : MonoBehaviour, IVisualCard
         return markedForDestruction;
     }
 
+    public bool IsAnimating
+    {
+        get => isAnimating;
+        set
+        {
+            isAnimating = value;
+            SetBehaviour();
+        }
+    }
+
     public void DestroyVisualCard()
     {
         // Eventuali Feedback di distruzione //
@@ -118,21 +129,29 @@ public class VisualCard : MonoBehaviour, IVisualCard
         return transform;
     }
 
-    void SetTextObjectsActive(bool steamCostActive, bool healthActive, bool damageActive, bool armorActive)
+    void SetTextObjectsActive(bool steamCostActive, bool healthActive, bool damageActive, bool actionPointsActive)
     {
         steamCost.transform.parent.gameObject.SetActive(steamCostActive);
         health.transform.parent.gameObject.SetActive(healthActive);
         damage.transform.parent.gameObject.SetActive(damageActive);
-        armor.transform.parent.gameObject.SetActive(armorActive);
+        actionPoints.transform.parent.gameObject.SetActive(actionPointsActive);
     }
 
     void SetBehaviour()
     {
-        bool canPlay = card.CardOwner.CanPlay;
+        if (card.CardOwner.GetPlayerType() == PlayerType.Player && !IsMarkedForDestruction())
+        {
+            bool canPlay = card.CardOwner.CanPlay;
 
-        draggable.enabled = canPlay && card.IsInHand;
-        cardTargeting.enabled = canPlay && !card.IsInHand;
-        cardHoverAnimation.enabled = card.IsInHand && card.CardOwner.GetPlayerType() == PlayerType.Player;
+            draggable.enabled = canPlay && card.IsInHand;
+            cardTargeting.enabled = canPlay && !card.IsInHand && card.ActionPoints > 0 && !IsAnimating;
+            cardHoverAnimation.enabled = card.IsInHand && card.CardOwner.GetPlayerType() == PlayerType.Player;
+        } else
+        {
+            draggable.enabled = false;
+            cardTargeting.enabled = false;
+            cardHoverAnimation.enabled = false;
+        }
     }
 
     public void ChangeBorderColor(Color borderColor)

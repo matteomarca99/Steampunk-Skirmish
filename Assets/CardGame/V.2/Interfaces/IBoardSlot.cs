@@ -38,4 +38,10 @@ public interface IBoardSlot
     /// </summary>
     /// <returns>Il tipo di piazzamento dello slot</returns>
     PlacementType GetPlacementType();
+
+    /// <summary>
+    /// Metodo che ritorna il tipo di slot.
+    /// </summary>
+    /// <returns>Il tipo di slot.</returns>
+    SlotType GetSlotType();
 }

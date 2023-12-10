@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Arrow : MonoBehaviour
 {
@@ -19,8 +20,9 @@ public class Arrow : MonoBehaviour
 
 	private RectTransform myRect;
 	private Canvas canvas;
-	private Camera mainCamera;
 	private bool isActive;
+
+	private List<IVisualCard> eligibleTargets;
 
 	private void Awake()
 	{
@@ -29,7 +31,6 @@ public class Arrow : MonoBehaviour
 
 		myRect = (RectTransform)transform;
 		canvas = GetComponentInParent<Canvas>();
-		mainCamera = Camera.main;
 		SetActive(startsActive);
 	}
 
@@ -52,6 +53,8 @@ public class Arrow : MonoBehaviour
 		differenceToMouse.Scale(new Vector2(1f / myRect.localScale.x, 1f / myRect.localScale.y));
 		transform.up = differenceToMouse;
 		baseRect.anchorMax = new Vector2(baseRect.anchorMax.x, differenceToMouse.magnitude / canvas.scaleFactor / baseHeight);
+
+		UpdateColor();
 	}
 
 	private void SetActive(bool b)
@@ -64,8 +67,9 @@ public class Arrow : MonoBehaviour
 
 	public void Activate() => SetActive(true);
 	public void Deactivate() => SetActive(false);
-	public void SetupAndActivate(Transform origin)
+	public void SetupAndActivate(Transform origin, List<IVisualCard> eligibleTargets)
 	{
+		this.eligibleTargets = eligibleTargets;
 		Origin = origin;
 		Activate();
 	}
@@ -77,4 +81,44 @@ public class Arrow : MonoBehaviour
 			image.color = color;
 		}
 	}
+
+	private void UpdateColor()
+	{
+		if (origin == null || canvas == null)
+			return;
+
+		PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+		pointerEventData.position = Input.mousePosition;
+
+		List<RaycastResult> results = new List<RaycastResult>();
+		EventSystem.current.RaycastAll(pointerEventData, results);
+
+		Color newColor = Color.blue; // Imposta un colore predefinito
+
+		foreach (RaycastResult result in results)
+		{
+			IBoardSlot boardSlot = result.gameObject.GetComponent<IBoardSlot>();
+			if (boardSlot != null)
+			{
+				// Cambia il colore per il BoardSlot
+				newColor = Color.blue; // Imposta il colore desiderato
+				break; // Esci dal loop una volta trovato un BoardSlot
+			}
+
+			IVisualCard visualCard = result.gameObject.GetComponent<IVisualCard>();
+			if (visualCard != null)
+			{
+				// Cambia il colore per la VisualCard se è un possibile bersaglio
+				if (eligibleTargets.Contains(visualCard))
+				{
+					newColor = Color.red; // Imposta il colore desiderato
+					break; // Esci dal loop una volta trovata una VisualCard
+				}
+			}
+		}
+
+		//ChangeColors(outlines, newColor);
+		ChangeColors(centers, newColor);
+	}
+
 }

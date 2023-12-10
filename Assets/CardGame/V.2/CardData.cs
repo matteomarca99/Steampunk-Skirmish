@@ -13,6 +13,7 @@ public class CardData : ScriptableObject
     public int health;
     public int armor;
     public int baseDamage;
+    public int actionPointsPerTurn;
     public PlacementType cardPlacement;
     public PlacementType cardAttackType;
 

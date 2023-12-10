@@ -5,9 +5,11 @@ using UnityEngine.UI;
 using System.Linq;
 using DG.Tweening;
 using TMPro;
+using Shapes2D;
 
 public class GameUI : MonoBehaviour, IGameUI
 {
+    public ColorData uiColors;
     public Canvas canvas;
     public Board board;
     public Transform playerCardsHolder;
@@ -15,13 +17,12 @@ public class GameUI : MonoBehaviour, IGameUI
     public Transform playerCardSpawn;
     public Transform opponentCardSpawn;
 
-    public GameObject damageTextPrefab;
-
-    public Color eligibleSlotColor;
-    public Color defaultTargetBorderColor;
-    public Color eligibleTargetBorderColor;
+    public GameObject floatingTextPrefab;
 
     public Button endTurnBtn;
+
+    public Shape zonePanel;
+    public TextMeshProUGUI zonetext;
 
     public Arrow arrow;
 
@@ -71,8 +72,7 @@ public class GameUI : MonoBehaviour, IGameUI
         // Aggiorna la UI delle carte negli slot
         boardSlots.ForEach(slot =>
         {
-
-            if (slot.GetCardInSlot() != null)
+            if (slot.GetCardInSlot() != null && slot.GetCardInSlot().IsAnimating == false)
             {
                 IVisualCard visualCardInSlot = slot.GetCardInSlot();
                 visualCardInSlot.RefreshVisualCard(slot.transform);
@@ -81,6 +81,9 @@ public class GameUI : MonoBehaviour, IGameUI
             // In caso ci fosse lo slot evidenziato (eligibleSlot), disattiviamo l'immagine
             slot.GetComponent<Image>().enabled = false;
         });
+
+        // Alla fine Effettuiamo anche il refresh della zona
+        RefreshZone();
     }
 
     public void ShowEligibleslots(IVisualCard visualCard)
@@ -92,7 +95,7 @@ public class GameUI : MonoBehaviour, IGameUI
         {
             Image image = slot.GetComponent<Image>();
             image.enabled = true;
-            image.color = eligibleSlotColor;
+            image.color = uiColors.eligibleSlotColor;
         });
     }
 
@@ -100,11 +103,9 @@ public class GameUI : MonoBehaviour, IGameUI
     {
         if (player.GetPlayerType() == PlayerType.Player)
         {
-            Debug.Log("ATTIVO!");
             endTurnBtn.interactable = true;
         } else
         {
-            Debug.Log("DISATTIVO!");
             endTurnBtn.interactable = false;
         }
 
@@ -113,7 +114,45 @@ public class GameUI : MonoBehaviour, IGameUI
 
     public void EndTurn()
     {
-        
+        RefreshBoard();
+    }
+
+    void RefreshZone()
+    {
+        ZoneStatus zoneStatus = board.GetZoneStatus();
+
+        switch (zoneStatus)
+        {
+            case ZoneStatus.PlayerControlled:
+                zonetext.text = "ZONA CONTROLLATA";
+                zonePanel.settings.fillColor = uiColors.playerZonePanelColor;
+                zonetext.color = uiColors.playerZoneTextColor;
+                break;
+
+            case ZoneStatus.OpponentControlled:
+                zonetext.text = "ZONA CONTROLLATA DALL'AVVERSARIO";
+                zonePanel.settings.fillColor = uiColors.opponentZonePanelColor;
+                zonetext.color = uiColors.opponentZoneTextColor;
+                break;
+
+            case ZoneStatus.Contested:
+                zonetext.text = "ZONA CONTESTATA";
+                zonePanel.settings.fillColor = uiColors.contestedZonePanelColor;
+                zonetext.color = uiColors.contestedZoneTextColor;
+                break;
+
+            case ZoneStatus.Neutral:
+                zonetext.text = "ZONA NEUTRALE";
+                zonePanel.settings.fillColor = uiColors.neutralZonePanelColor;
+                zonetext.color = uiColors.neutralZoneTextColor;
+                break;
+
+            default:
+                zonetext.text = "STATO SCONOSCIUTO";
+                zonePanel.settings.fillColor = Color.black;
+                zonetext.color = Color.white;
+                break;
+        }
     }
 
     public void DoAttackAnim(IVisualCard attacker, IVisualCard target)
@@ -123,6 +162,10 @@ public class GameUI : MonoBehaviour, IGameUI
 
     private IEnumerator AttackAnimation(IVisualCard attacker, IVisualCard target)
     {
+        attacker.IsAnimating = true;
+
+        Debug.Log(attacker.IsAnimating.ToString());
+
         Transform attackerTransform = attacker.GetTransform();
         Vector3 startPos = attackerTransform.position;
 
@@ -156,12 +199,15 @@ public class GameUI : MonoBehaviour, IGameUI
         attacker.RefreshVisualCard();
         target.RefreshVisualCard();
 
+        // Aggiorniamo anche la UI della zona
+        RefreshZone();
+
         // Calcola il danno e posizione per i numeri floating
         int damage = attacker.GetCard().CardData.baseDamage;
         Vector3 damageTextPosition = target.GetTransform().position;
 
         // Crea e mostra il numero di danno come UI temporanea
-        StartCoroutine(ShowDamageFloatingText(damageTextPosition, damage));
+        StartCoroutine(ShowFloatingText(damageTextPosition, "-" + damage.ToString()));
 
         // 4) Muoviamo la carta verso la sua posizione iniziale
         float returnMoveDuration = attacker.GetCard().CardData.attackAnimationData.returnMoveDuration;
@@ -170,18 +216,20 @@ public class GameUI : MonoBehaviour, IGameUI
         // 5) Ruotiamo la carta nella sua rotazione originaria
         float returnRotationDuration = attacker.GetCard().CardData.attackAnimationData.returnRotationDuration;
         yield return attackerTransform.DORotate(Vector3.zero, returnRotationDuration).WaitForCompletion();
+
+        attacker.IsAnimating = false;
     }
 
-    private IEnumerator ShowDamageFloatingText(Vector3 position, int damage)
+    private IEnumerator ShowFloatingText(Vector3 position, string text)
     {
         // Crea un'etichetta temporanea per mostrare il danno inflitto
-        GameObject damageTextObject = Instantiate(damageTextPrefab, position, Quaternion.identity);
+        GameObject damageTextObject = Instantiate(floatingTextPrefab, position, Quaternion.identity);
         damageTextObject.transform.SetParent(canvas.transform);
         damageTextObject.transform.localScale = Vector3.one;
 
         // Impostiamo il valore del danno
         TextMeshProUGUI damageText = damageTextObject.GetComponent<TextMeshProUGUI>();
-        damageText.text = "-" + damage.ToString();
+        damageText.text = text;
 
         // E lo muoviamo verso l'alto
         yield return damageTextObject.transform.DOMove(damageTextObject.transform.position + Vector3.up, 1f).WaitForCompletion();
@@ -228,12 +276,12 @@ public class GameUI : MonoBehaviour, IGameUI
 
     public void BeginTargeting(IVisualCard attacker, Transform position, List<IVisualCard> eligibleTargets)
     {
-        arrow.SetupAndActivate(position);
+        arrow.SetupAndActivate(position, eligibleTargets);
 
         // Evidenziamo i possibili targets
         eligibleTargets.ForEach(target =>
         {
-            target.ChangeBorderColor(eligibleTargetBorderColor);
+            target.ChangeBorderColor(uiColors.eligibleTargetBorderColor);
         });
     }
 
@@ -244,8 +292,10 @@ public class GameUI : MonoBehaviour, IGameUI
         // Disattiviamo l'evidenziazione dei possibili target
         eligibleTargets.ForEach(target =>
         {
-            target.ChangeBorderColor(defaultTargetBorderColor);
+            target.ChangeBorderColor(uiColors.defaultTargetBorderColor);
         });
+
+        RefreshBoard();
     }
 
     Transform GetCardTransform(PlayerType playerType, bool useHolder)

@@ -42,6 +42,11 @@ public interface IVisualCard
     bool IsMarkedForDestruction();
 
     /// <summary>
+    /// Metodo che definisce se una carta sta eseguendo un'animazione oppure no.
+    /// </summary>
+    bool IsAnimating { get; set; }
+
+    /// <summary>
     /// Metodo utilizzato per distruggere la VisualCard
     /// </summary>
     void DestroyVisualCard();

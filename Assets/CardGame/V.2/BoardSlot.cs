@@ -3,19 +3,32 @@ using System;
 
 public class BoardSlot : MonoBehaviour, IBoardSlot
 {
-    private IVisualCard cardInSlot; // Riferimento alla carta visuale presente nello slot
+    [SerializeField] private IVisualCard cardInSlot; // Riferimento alla carta visuale presente nello slot
 
-    public PlayerType slotOwner;
+    [SerializeField] private PlayerType slotOwner;
 
-    public PlacementType placementType;
+    [SerializeField] private PlacementType placementType;
+
+    [SerializeField] private SlotType slotType;
 
     public bool CanDropCard(IVisualCard visualCard)
     {
-        // Logica per verificare se la carta può essere posizionata in questa cella
-        return cardInSlot == null 
-            && visualCard.GetCard().CardData.cardPlacement == placementType 
-            && visualCard.GetCard().CardOwner.GetPlayerType() == slotOwner;
+        if (cardInSlot != null || visualCard.GetCard().CardOwner.GetPlayerType() != slotOwner || visualCard.GetCard().CardData.cardPlacement != placementType)
+        {
+            return false;
+        }
+
+        if (slotType == SlotType.Zone)
+        {
+            // Se lo slot è di tipo Zona, controlla se la carta non è nella mano del giocatore
+            if (visualCard.GetCard().IsInHand)
+            {
+                return false;
+            }
+        }
+        return true;
     }
+
 
     public void DropCard(IVisualCard visualCard)
     {
@@ -48,5 +61,10 @@ public class BoardSlot : MonoBehaviour, IBoardSlot
     public PlacementType GetPlacementType()
     {
         return placementType;
+    }
+
+    public SlotType GetSlotType()
+    {
+        return slotType;
     }
 }

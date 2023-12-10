@@ -6,6 +6,7 @@ public enum EventType
     OnDrawCard,
     OnCardDrag,
     OnTryPlayCard,
+    OnTryMoveCard,
     OnStartTurn,
     OnEndTurn,
     OnTryCardAttack,

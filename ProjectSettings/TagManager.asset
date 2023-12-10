@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - World
   - NoMask
+  - BoardSlot
+  - VisualCard
   layers:
   - Default
   - TransparentFX

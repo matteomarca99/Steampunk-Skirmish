@@ -7,6 +7,7 @@ public class Card : ICard, IDamageable
     private CardDirectionType cardDirection;
     private int curhealth;
     private bool isInHand;
+    private int curActionPoints;
 
     public CardData CardData => cardData;
 
@@ -18,20 +19,13 @@ public class Card : ICard, IDamageable
 
     public bool IsInHand { get => isInHand; set => isInHand = value; }
 
+    public int ActionPoints { get => curActionPoints; set => curActionPoints = value; }
+
     public Card(CardData cardData)
     {
         this.cardData = cardData;
         this.curhealth = cardData.health;
-    }
-
-    public void Play()
-    {
-        // Implementazione della logica per giocare la carta utilizzando i dati da cardData
-    }
-
-    public void Attack(ICard target)
-    {
-        // Implementazione della logica di attacco utilizzando i dati da cardData
+        this.curActionPoints = cardData.actionPointsPerTurn;
     }
 
     public void TakeDamage(int damageAmount)

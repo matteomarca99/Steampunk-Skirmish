@@ -30,11 +30,12 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
         // Notifichiamo che stiamo effettuando il drag di una carta
         EventManager.TriggerEvent(EventType.OnCardDrag, visualCard);
+
+        Debug.Log("DRAG");
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //CardsGameManager.Instance.DisableAllSlotImages();
         canvasGroup.blocksRaycasts = true;
 
         GameObject dropZone = eventData.pointerEnter;
@@ -43,5 +44,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
         // Se il drag finisce, proviamo a giocare la carta
         EventManager.TriggerEvent(EventType.OnTryPlayCard, visualCard, slot);
+
+        Debug.Log("END DRAG");
     }
 }

@@ -25,20 +25,13 @@ public interface ICard
     /// </summary>
     CardDirectionType CardDirectionType { get; set; }
 
-
     /// <summary>
     /// Metodo che definisce se la carta e' in mano al giocatore oppure no.
     /// </summary>
     bool IsInHand { get; set; }
 
     /// <summary>
-    /// Metodo che definisce la logica da eseguire quando si gioca la carta.
+    /// Metodo che definisce i punti azione disponibili per la carta.
     /// </summary>
-    void Play();
-
-    /// <summary>
-    /// Metodo che definisce la logica di quando la carta esegue un attacco.
-    /// </summary>
-    /// <param name="target">La carta bersaglio.</param>
-    void Attack(ICard target);
+    int ActionPoints { get; set; }
 }

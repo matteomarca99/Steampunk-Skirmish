@@ -24,9 +24,19 @@ public class Board : MonoBehaviour, IBoard
         return slot.GetCardInSlot();
     }
 
+    public IBoardSlot FindSlotByCard(IVisualCard visualCard)
+    {
+        return boardSlots.FirstOrDefault(slot => slot.GetCardInSlot() == visualCard);
+    }
+
     public List<IBoardSlot> GetBoardSlots()
     {
         return boardSlots.Cast<IBoardSlot>().ToList();
+    }
+
+    public List<IBoardSlot> GetSlotsOfType(SlotType slotType)
+    {
+        return boardSlots.Where(slot => slot.GetSlotType() == slotType).Cast<IBoardSlot>().ToList();
     }
 
     public List<IVisualCard> GetVisualCards()
@@ -36,8 +46,41 @@ public class Board : MonoBehaviour, IBoard
                 .ToList();
     }
 
+    public List<IVisualCard> GetVisualCardsOfPlayer(IPlayer owner)
+    {
+        return GetVisualCards().Where(visualCard => visualCard.GetCard().CardOwner == owner).ToList();
+    }
+
     public List<IBoardSlot> GetEligibleSlots(IVisualCard visualCard)
     {
         return boardSlots.Where(slot => CanPlaceCard(visualCard, slot)).ToList<IBoardSlot>();
+    }
+
+    public ZoneStatus GetZoneStatus()
+    {
+        List<IBoardSlot> zoneSlots = GetSlotsOfType(SlotType.Zone);
+
+        int playerCount = zoneSlots.Count(slot => slot.GetCardInSlot() != null && slot.GetSlotOwner() == PlayerType.Player);
+        int opponentCount = zoneSlots.Count(slot => slot.GetCardInSlot() != null && slot.GetSlotOwner() == PlayerType.Opponent);
+
+        if (playerCount > 0 || opponentCount > 0)
+        {
+            if (playerCount > opponentCount)
+            {
+                return ZoneStatus.PlayerControlled;
+            }
+            else if (opponentCount > playerCount)
+            {
+                return ZoneStatus.OpponentControlled;
+            }
+            else
+            {
+                return ZoneStatus.Contested;
+            }
+        }
+        else
+        {
+            return ZoneStatus.Neutral;
+        }
     }
 }
