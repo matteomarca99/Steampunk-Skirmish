@@ -14,11 +14,15 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 
     public GameUI gameUI;
     public Board board;
+    public ScoreManager scoreManager;
+    private TurnManager turnManager;
+    private DamageManager damageManager;
+
     public int initialCardsNumber;
     public float aiDelay;
 
-    private TurnManager turnManager;
-    private DamageManager damageManager;
+    public int pointsGeneratedByZone;
+    public int pointsToWin;
 
     private Player player;
     private AIPlayer opponent;
@@ -78,6 +82,9 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 
         // Inizializzazione del TurnManager
         turnManager = new TurnManager(players);
+
+        // Inizializzazione dello ScoreManager
+        scoreManager = new ScoreManager();
 
         // Comunichiamo al TurnManager di iniziare il turno.
         turnManager.StartTurn();
@@ -139,14 +146,16 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 
         float delay = GetPlayerDelay(curTurnPlayer);
 
-        //ZoneStatus zoneStatus = board.GetZoneStatus(); //////////
-
         actionQueueManager.EnqueueAction(() =>
         {
             curTurnPlayer.CanPlay = false;
             OnDisableActionPoints(curTurnPlayer);
+            OnAssignZonePoints(pointsGeneratedByZone);
             turnManager.EndTurn();
-            gameUI.EndTurn();
+            gameUI.EndTurn(scoreManager);
+
+            OnCheckWinCondition();
+
         }, delay, 0f);
     }
 
@@ -178,12 +187,6 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
         UpdateUI(curTurnPlayer);
     }
 
-    void UpdateUI(IPlayer curTurnPlayer)
-    {
-        gameUI.RefreshHand(curTurnPlayer);
-        gameUI.RefreshBoard();
-    }
-
     void OnTryMoveCard(IVisualCard card, IBoardSlot slot)
     {
         IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
@@ -195,18 +198,23 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
             // Per prima cosa verifichiamo se la carta puo' essere posisizonata sullo slot corrispondente
             if (board.CanPlaceCard(card, slot) && card.GetCard().ActionPoints > 0)
             {
-                // Rimuoviamo la carta dallo slot attuale
-                board.FindSlotByCard(card).RemoveCard();
-
-                // E la posizioniamo nello slot corrispondente
-                board.PlaceCard(card, slot);
-
-                // Infine, consumiamo un actionPoint
-                card.GetCard().ActionPoints--;
+                MoveCard(card, slot);
             }
             // Infine aggiorniamo la UI
             gameUI.RefreshBoard();
         }, delay, 0f);
+    }
+
+    void MoveCard(IVisualCard card, IBoardSlot slot)
+    {
+        // Rimuoviamo la carta dallo slot attuale
+        board.FindSlotByCard(card).RemoveCard();
+
+        // E la posizioniamo nello slot corrispondente
+        board.PlaceCard(card, slot);
+
+        // Infine, consumiamo un actionPoint
+        card.GetCard().ActionPoints--;
     }
 
     void OnTryCardAttack(IVisualCard attacker, IVisualCard target)
@@ -219,17 +227,28 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
             {
                 if (damageManager.CanAttack(attacker, target) && attacker.GetCard().ActionPoints > 0)
                 {
-                    damageManager.Attack(attacker, target);
-                    gameUI.DoAttackAnim(attacker, target);
-
-                    // Infine, consumiamo un actionPoint
-                    attacker.GetCard().ActionPoints--;
+                    CardAttack(attacker, target);
                 } else
                 {
                     animLength = 0;
                 }
             }, 0f, animLength);
         }
+    }
+
+    void CardAttack(IVisualCard attacker, IVisualCard target)
+    {
+        damageManager.Attack(attacker, target);
+        gameUI.DoAttackAnim(attacker, target);
+
+        // Infine, consumiamo un actionPoint
+        attacker.GetCard().ActionPoints--;
+    }
+
+    void UpdateUI(IPlayer curTurnPlayer)
+    {
+        gameUI.RefreshHand(curTurnPlayer);
+        gameUI.RefreshBoard();
     }
 
     void OnCardDestroyed(IVisualCard visualCard)
@@ -273,6 +292,39 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
         playerCardsOnBoard.ForEach(visualCard => visualCard.GetCard().ActionPoints = 0);
 
         Debug.Log("Disabilito AP di " + player.GetPlayerName());
+    }
+
+    void OnAssignZonePoints(int points)
+    {
+        if (points > 0)
+        {
+            ZoneStatus zoneStatus = board.GetZoneStatus();
+
+            if (zoneStatus == ZoneStatus.PlayerControlled)
+            {
+                Debug.Log("ZONA CONTROLLATA DA " + zoneStatus.ToString() + " ASSEGNO " + points + " PUNTI");
+                scoreManager.PlayerScore += points;
+                scoreManager.LastPlayerScoreAdded += points;
+            }
+            else if (zoneStatus == ZoneStatus.OpponentControlled)
+            {
+                Debug.Log("ZONA CONTROLLATA DA " + zoneStatus.ToString() + " ASSEGNO " + points + " PUNTI");
+                scoreManager.OpponentScore += points;
+                scoreManager.LastOpponentScoreAdded += points;
+            }
+        }
+    }
+
+    void OnCheckWinCondition()
+    {
+        if(scoreManager.PlayerScore >= pointsToWin)
+        {
+            Debug.Log("HAI VINTO!!!");
+        }
+        else if(scoreManager.OpponentScore >= pointsToWin)
+        {
+            Debug.Log("HAI PERSO!!!");
+        }
     }
 
     public void OnEndTurnBtn()

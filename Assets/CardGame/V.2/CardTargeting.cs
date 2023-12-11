@@ -13,11 +13,6 @@ public class CardTargeting : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        /*
-        // Ovviamente se la carta non è di proprietà del player, non possiamo fare il targeting
-        if (attackingVisualCard.GetCard().CardOwner.GetPlayerType() != PlayerType.Player)
-            return;*/
-
         Debug.Log("ATTACCANTE: " + attackingVisualCard.GetCard().CardData.name);
 
         // Notifichiamo l'inizio del targeting

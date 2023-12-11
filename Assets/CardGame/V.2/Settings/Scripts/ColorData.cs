@@ -18,4 +18,7 @@ public class ColorData : ScriptableObject
 
     public Color neutralZonePanelColor;
     public Color neutralZoneTextColor;
+
+    public Color playerScoreAddColor;
+    public Color opponentScoreAddColor;
 }

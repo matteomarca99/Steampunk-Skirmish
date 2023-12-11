@@ -23,3 +23,5 @@ MonoBehaviour:
   contestedZoneTextColor: {r: 0, g: 0, b: 0, a: 1}
   neutralZonePanelColor: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
   neutralZoneTextColor: {r: 1, g: 1, b: 1, a: 1}
+  playerScoreAddColor: {r: 1, g: 1, b: 1, a: 1}
+  opponentScoreAddColor: {r: 1, g: 1, b: 1, a: 1}

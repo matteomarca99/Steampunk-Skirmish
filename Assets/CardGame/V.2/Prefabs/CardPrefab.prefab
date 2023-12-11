@@ -1137,6 +1137,7 @@ GameObject:
   - component: {fileID: 8123892469095186165}
   - component: {fileID: 2971028228229999718}
   - component: {fileID: 3423989137491916009}
+  - component: {fileID: 6392803524342941819}
   m_Layer: 5
   m_Name: ActionPoints
   m_TagString: Untagged
@@ -1258,6 +1259,20 @@ MonoBehaviour:
     _usePolygonMap: 0
   wasConverted: 0
   preConvertedScale: {x: 0, y: 0, z: 0}
+--- !u!114 &6392803524342941819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6924993746884095492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d3c46f8c0b37ce4890946ffd82556c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pulseScale: 0.015
+  duration: 1
 --- !u!1 &8171851240528399595
 GameObject:
   m_ObjectHideFlags: 0

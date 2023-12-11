@@ -38,5 +38,6 @@ public interface IGameUI
     /// <summary>
     /// Metodo utilizzato per attivare la logica UI di quando finisce un turno (es: disattivare i controlli del giocatore).
     /// </summary>
-    void EndTurn();
+    /// <param name="scoreManager">Il gestore dei punteggi.</param>
+    void EndTurn(IScoreManager scoreManager);
 }

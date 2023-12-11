@@ -24,6 +24,9 @@ public class GameUI : MonoBehaviour, IGameUI
     public Shape zonePanel;
     public TextMeshProUGUI zonetext;
 
+    public TextMeshProUGUI playerScoreText;
+    public TextMeshProUGUI opponentScoreText;
+
     public Arrow arrow;
 
     public void RefreshHand(IPlayer player)
@@ -112,9 +115,10 @@ public class GameUI : MonoBehaviour, IGameUI
         RefreshBoard();
     }
 
-    public void EndTurn()
+    public void EndTurn(IScoreManager scoreManager)
     {
         RefreshBoard();
+        RefreshScore(scoreManager);
     }
 
     void RefreshZone()
@@ -152,6 +156,23 @@ public class GameUI : MonoBehaviour, IGameUI
                 zonePanel.settings.fillColor = Color.black;
                 zonetext.color = Color.white;
                 break;
+        }
+    }
+
+    void RefreshScore(IScoreManager scoreManager)
+    {
+        playerScoreText.text = "PUNTI: " + scoreManager.PlayerScore;
+        opponentScoreText.text = "PUNTI: " + scoreManager.OpponentScore;
+
+        if (scoreManager.LastPlayerScoreAdded > 0)
+        {
+            StartCoroutine(ShowFloatingText(playerScoreText.transform.position + Vector3.up, "+" + scoreManager.LastPlayerScoreAdded.ToString(), uiColors.playerScoreAddColor));
+            scoreManager.LastPlayerScoreAdded = 0;
+        }
+        if (scoreManager.LastOpponentScoreAdded > 0)
+        {
+            StartCoroutine(ShowFloatingText(opponentScoreText.transform.position + Vector3.down, "+" + scoreManager.LastOpponentScoreAdded.ToString(), uiColors.opponentScoreAddColor));
+            scoreManager.LastOpponentScoreAdded = 0;
         }
     }
 
@@ -207,7 +228,7 @@ public class GameUI : MonoBehaviour, IGameUI
         Vector3 damageTextPosition = target.GetTransform().position;
 
         // Crea e mostra il numero di danno come UI temporanea
-        StartCoroutine(ShowFloatingText(damageTextPosition, "-" + damage.ToString()));
+        StartCoroutine(ShowFloatingText(damageTextPosition, "-" + damage.ToString(), Color.red));
 
         // 4) Muoviamo la carta verso la sua posizione iniziale
         float returnMoveDuration = attacker.GetCard().CardData.attackAnimationData.returnMoveDuration;
@@ -218,24 +239,6 @@ public class GameUI : MonoBehaviour, IGameUI
         yield return attackerTransform.DORotate(Vector3.zero, returnRotationDuration).WaitForCompletion();
 
         attacker.IsAnimating = false;
-    }
-
-    private IEnumerator ShowFloatingText(Vector3 position, string text)
-    {
-        // Crea un'etichetta temporanea per mostrare il danno inflitto
-        GameObject damageTextObject = Instantiate(floatingTextPrefab, position, Quaternion.identity);
-        damageTextObject.transform.SetParent(canvas.transform);
-        damageTextObject.transform.localScale = Vector3.one;
-
-        // Impostiamo il valore del danno
-        TextMeshProUGUI damageText = damageTextObject.GetComponent<TextMeshProUGUI>();
-        damageText.text = text;
-
-        // E lo muoviamo verso l'alto
-        yield return damageTextObject.transform.DOMove(damageTextObject.transform.position + Vector3.up, 1f).WaitForCompletion();
-
-        // Aggiungi un'animazione se necessario (es. fading out)
-        Destroy(damageTextObject);
     }
 
     public void DoDrawAnim(IPlayer player)
@@ -272,6 +275,25 @@ public class GameUI : MonoBehaviour, IGameUI
 
         // 3) Fine animazione, aggiorniamo la mano del giocatore così la carta viene aggiunta correttamente al relativo holder
         RefreshHand(player);
+    }
+
+    private IEnumerator ShowFloatingText(Vector3 position, string text, Color textColor)
+    {
+        // Crea un'etichetta temporanea per mostrare il danno inflitto
+        GameObject damageTextObject = Instantiate(floatingTextPrefab, position, Quaternion.identity);
+        damageTextObject.transform.SetParent(canvas.transform);
+        damageTextObject.transform.localScale = Vector3.one;
+
+        // Impostiamo il valore del danno
+        TextMeshProUGUI damageText = damageTextObject.GetComponent<TextMeshProUGUI>();
+        damageText.text = text;
+        damageText.color = textColor;
+
+        // E lo muoviamo verso l'alto
+        yield return damageTextObject.transform.DOMove(damageTextObject.transform.position + Vector3.up, 1f).WaitForCompletion();
+
+        // Aggiungi un'animazione se necessario (es. fading out)
+        Destroy(damageTextObject);
     }
 
     public void BeginTargeting(IVisualCard attacker, Transform position, List<IVisualCard> eligibleTargets)
