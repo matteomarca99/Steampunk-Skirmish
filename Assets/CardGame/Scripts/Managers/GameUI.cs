@@ -30,6 +30,9 @@ public class GameUI : MonoBehaviour, IGameUI
     public TextMeshProUGUI playerSteamPointsText;
     public TextMeshProUGUI opponentSteamPointsText;
 
+    public GameObject endSplash;
+    public Text endSplashText;
+
     public Arrow arrow;
 
     public void RefreshHand(IPlayer player)
@@ -81,7 +84,7 @@ public class GameUI : MonoBehaviour, IGameUI
         // Aggiorna la UI delle carte negli slot
         boardSlots.ForEach(slot =>
         {
-            if (slot.GetCardInSlot() != null && slot.GetCardInSlot().IsAnimating == false)
+            if (slot.GetCardInSlot() != null && slot.GetCardInSlot().IsAnimating == false && !slot.GetCardInSlot().IsMarkedForDestruction())
             {
                 IVisualCard visualCardInSlot = slot.GetCardInSlot();
                 visualCardInSlot.RefreshVisualCard(slot.transform);
@@ -126,6 +129,19 @@ public class GameUI : MonoBehaviour, IGameUI
     {
         RefreshBoard();
         RefreshScore(scoreManager);
+    }
+
+    public void EndGame(IPlayer winner)
+    {
+        endSplash.SetActive(true);
+        
+        if(winner.GetPlayerType() == PlayerType.Player)
+        {
+            endSplashText.text = "HAI VINTO!";
+        } else
+        {
+            endSplashText.text = "HAI PERSO!";
+        }
     }
 
     void RefreshZone()
@@ -205,6 +221,7 @@ public class GameUI : MonoBehaviour, IGameUI
         attacker.IsAnimating = true;
 
         Transform attackerTransform = attacker.GetTransform();
+        Transform targetTransform = target.GetTransform();
         Vector3 startPos = attackerTransform.position;
 
         Vector3 distance = target.GetTransform().position - startPos;
@@ -218,26 +235,30 @@ public class GameUI : MonoBehaviour, IGameUI
             angle = -angle;
         }
 
+        // Prendiamo il danno da mostrare
+        int damage = attacker.GetCard().CardData.baseDamage;
+
+        // Prendiamo i delay
+        float rotationDuration = attacker.GetCard().CardData.attackAnimationData.rotationDuration;  // Delay rotazione verso il target
+        float backwardMoveDuration = attacker.GetCard().CardData.attackAnimationData.backwardMoveDuration; // Delay movimento all'indietro
+        float forwardMoveDuration = attacker.GetCard().CardData.attackAnimationData.forwardMoveDuration; // Delay movimento verso il target
+        float returnMoveDuration = attacker.GetCard().CardData.attackAnimationData.returnMoveDuration; // Delay movimento verso la posizione iniziale
+        float returnRotationDuration = attacker.GetCard().CardData.attackAnimationData.returnRotationDuration; // Delay rotazione iniziale
+
         // Animazione di attacco
 
         // 1) Ruotiamo la carta verso il target
-        float rotationDuration = attacker.GetCard().CardData.attackAnimationData.rotationDuration;
         yield return attackerTransform.DORotate(new Vector3(0, 0, angle), rotationDuration).WaitForCompletion();
 
         // 2) Muoviamo la carta indietro (come per prendere la rincorsa)
-        float backwardMoveDuration = attacker.GetCard().CardData.attackAnimationData.backwardMoveDuration;
         Vector3 backwardPosition = attackerTransform.position - attackerTransform.up * 0.8f;
         yield return attackerTransform.DOMove(backwardPosition, backwardMoveDuration).WaitForCompletion();
 
         // 3) Muoviamo la carta verso il target
-        float forwardMoveDuration = attacker.GetCard().CardData.attackAnimationData.forwardMoveDuration;
         yield return attackerTransform.DOMove(startPos + distance, forwardMoveDuration).WaitForCompletion();
 
-        // Calcola il danno e posizione per i numeri floating
-        int damage = attacker.GetCard().CardData.baseDamage;
-        Vector3 damageTextPosition = target.GetTransform().position;
-
         // Crea e mostra il numero di danno come UI temporanea
+        Vector3 damageTextPosition = targetTransform.position;
         StartCoroutine(ShowFloatingText(damageTextPosition, "-" + damage.ToString(), Color.red));
 
         // Attacco effettuato, aggiorniamo la UI delle carte
@@ -248,14 +269,13 @@ public class GameUI : MonoBehaviour, IGameUI
         RefreshZone();
 
         // 4) Muoviamo la carta verso la sua posizione iniziale
-        float returnMoveDuration = attacker.GetCard().CardData.attackAnimationData.returnMoveDuration;
         yield return attackerTransform.DOMove(startPos, returnMoveDuration).WaitForCompletion();
 
         // 5) Ruotiamo la carta nella sua rotazione originaria
-        float returnRotationDuration = attacker.GetCard().CardData.attackAnimationData.returnRotationDuration;
         yield return attackerTransform.DORotate(Vector3.zero, returnRotationDuration).WaitForCompletion();
 
-        attacker.IsAnimating = false;
+        if(attacker != null)
+            attacker.IsAnimating = false;
     }
 
     public void DoDrawAnim(IPlayer player)

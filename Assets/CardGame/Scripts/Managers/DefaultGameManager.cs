@@ -100,9 +100,11 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
         // Implementazione per mettere in pausa la partita
     }
 
-    public void EndGame()
+    public void EndGame(IPlayer winner)
     {
         // Implementazione per concludere la partita
+
+        gameUI.EndGame(winner);
     }
 
     void OnDrawcard(IPlayer player)
@@ -125,24 +127,27 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 
     void OnStartTurn()
     {
-        IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
-
-        // E assegnamo gli steamPoints del turno
-        OnAssignSteamPoints(curTurnPlayer);
-
-        // Inizio del turno, peschiamo una carta
-        OnDrawcard(curTurnPlayer);
-
-        // Ripristiniamo gli ActionPoints delle carte del giocatore di turno
-        OnResetActionPoints(curTurnPlayer);
-
-        curTurnPlayer.CanPlay = true;
-
-        gameUI.StartTurn(curTurnPlayer);
-
-        if (curTurnPlayer.GetPlayerType() == PlayerType.Opponent)
+        if (OnCheckWinCondition() == false)
         {
-            _ = AIBehaviour.PlayTurn();
+            IPlayer curTurnPlayer = turnManager.GetCurrentTurnPlayer();
+
+            // E assegnamo gli steamPoints del turno
+            OnAssignSteamPoints(curTurnPlayer);
+
+            // Inizio del turno, peschiamo una carta
+            OnDrawcard(curTurnPlayer);
+
+            // Ripristiniamo gli ActionPoints delle carte del giocatore di turno
+            OnResetActionPoints(curTurnPlayer);
+
+            curTurnPlayer.CanPlay = true;
+
+            gameUI.StartTurn(curTurnPlayer);
+
+            if (curTurnPlayer.GetPlayerType() == PlayerType.Opponent)
+            {
+                _ = AIBehaviour.PlayTurn();
+            }
         }
     }
 
@@ -208,12 +213,14 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
                 MoveCard(card, slot);
             }
             // Infine aggiorniamo la UI
+            Debug.Log("REFRESHO IL MOVIMENTO! 1");
             gameUI.RefreshBoard();
         }, delay, 0f);
     }
 
     void MoveCard(IVisualCard card, IBoardSlot slot)
     {
+        Debug.Log("MUOVO!");
         // Rimuoviamo la carta dallo slot attuale
         board.FindSlotByCard(card).RemoveCard();
 
@@ -222,6 +229,10 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
 
         // Infine, consumiamo un actionPoint
         card.GetCard().ActionPoints--;
+
+        Debug.Log("REFRESHO IL MOVIMENTO! 2");
+        // Infine aggiorniamo la UI
+        gameUI.RefreshBoard();
     }
 
     void OnTryCardAttack(IVisualCard attacker, IVisualCard target)
@@ -331,16 +342,20 @@ public class DefaultGameManager : MonoBehaviour, IGameManager
         Debug.Log("SP OPPONENT: " + opponent.SteamPoints);
     }
 
-    void OnCheckWinCondition()
+    bool OnCheckWinCondition()
     {
         if(scoreManager.PlayerScore >= pointsToWin)
         {
-            Debug.Log("HAI VINTO!!!");
+            EndGame(player);
+            return true;
         }
         else if(scoreManager.OpponentScore >= pointsToWin)
         {
-            Debug.Log("HAI PERSO!!!");
+            EndGame(opponent);
+            return true;
         }
+
+        return false;
     }
 
     public void OnEndTurnBtn()

@@ -40,4 +40,10 @@ public interface IGameUI
     /// </summary>
     /// <param name="scoreManager">Il gestore dei punteggi relativo allo score.</param>
     void EndTurn(IScoreManager scoreManager);
+
+    /// <summary>
+    /// Metodo per gestire la UI quando la partita viene conclusa.
+    /// </summary>
+    /// <param name="winner">Il vincitore della partita.</param>
+    void EndGame(IPlayer winner);
 }

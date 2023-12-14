@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using MoreMountains.Feedbacks;
 
 [CreateAssetMenu(menuName = "Card/Card Data")]
 public class CardData : ScriptableObject
@@ -16,6 +17,7 @@ public class CardData : ScriptableObject
     public int actionPointsPerTurn;
     public PlacementType cardPlacement;
     public PlacementType cardAttackType;
+    public MMFeedbacks deathFeedback;
 
     [Serializable]
     public class CardEffectData

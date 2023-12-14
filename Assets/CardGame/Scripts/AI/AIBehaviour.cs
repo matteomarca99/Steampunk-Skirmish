@@ -108,6 +108,7 @@ public class AIBehaviour : IAIBehaviour
     {
         IVisualCard attackingCard = move.Card;
         IVisualCard targetCard = move.Target;
+        SlotType targetSlotType = board.FindSlotByCard(targetCard).GetSlotType();
 
         switch (move.MoveType)
         {
@@ -142,9 +143,14 @@ public class AIBehaviour : IAIBehaviour
                 int attackScore = attackingCard.GetCard().CardData.baseDamage;
                 int targetScore = targetCard.GetCard().CardData.baseDamage;
 
-                // Ritorna la differenza tra i punteggi di attacco
-                return attackScore - targetScore;
+                int score = attackScore - targetScore;
 
+                // Se il target sta su una zona, allora la priorita è più alta
+                if (targetSlotType == SlotType.Zone)
+                    score = 100;
+
+                // Ritorna la differenza tra i punteggi di attacco
+                return score;
             default:
                 return 0;
         }

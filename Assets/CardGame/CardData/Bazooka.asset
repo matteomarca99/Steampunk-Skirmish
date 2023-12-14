@@ -23,6 +23,8 @@ MonoBehaviour:
   actionPointsPerTurn: 1
   cardPlacement: 0
   cardAttackType: 0
+  deathFeedback: {fileID: 6251737872128332998, guid: 8deeeb60642f8f5449fd2b87e023ced1,
+    type: 3}
   cardEffect: []
   attackAnimationData:
     rotationDuration: 0.2

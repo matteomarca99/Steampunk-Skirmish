@@ -47,7 +47,7 @@ public interface IVisualCard
     bool IsAnimating { get; set; }
 
     /// <summary>
-    /// Metodo utilizzato per distruggere la VisualCard
+    /// Metodo utilizzato per distruggere la VisualCard.
     /// </summary>
     void DestroyVisualCard();
 

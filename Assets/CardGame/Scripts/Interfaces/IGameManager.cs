@@ -13,8 +13,10 @@ public interface IGameManager
     /// </summary>
     void PauseGame();
 
+
     /// <summary>
     /// Metodo utilizzato per concludere la partita.
     /// </summary>
-    void EndGame();
+    /// <param name="winner">Il vincitore della partita.</param>
+    void EndGame(IPlayer winner);
 }

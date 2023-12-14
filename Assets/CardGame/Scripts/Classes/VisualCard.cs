@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using MoreMountains.Feedbacks;
 
 public class VisualCard : MonoBehaviour, IVisualCard
 {
@@ -119,6 +120,9 @@ public class VisualCard : MonoBehaviour, IVisualCard
         // Se la carta non è in mano, significa che è in uno slot, quindi la rimuoviamo dallo slot
         if(!card.IsInHand)
             GetComponentInParent<IBoardSlot>().RemoveCard();
+
+        // Istanziamo il feedback di distruzione
+        Instantiate(card.CardData.deathFeedback, transform.position, Quaternion.identity);
 
         // Notifichiamo la distruzione della carta
         EventManager.TriggerEvent<IVisualCard>(EventType.OnCardDestroyed, this);
